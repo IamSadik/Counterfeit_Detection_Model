@@ -5,7 +5,7 @@ This project aims to detect and verify counterfeit medicinal capsules using a de
 ---
 
 ## 📁 Project Structure
-**```**
+```
 capsule-counterfeit-detection/
 ├── datasets/
 │ └── capsule_counterfeit_dataset/
@@ -35,7 +35,7 @@ capsule-counterfeit-detection/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
-**```**
+```
 
 ---
 
@@ -91,7 +91,7 @@ roboflow:
   url: https://universe.roboflow.com/medetect/medetect-9kphx/dataset/11
 ```
 
-
+```
 🚀 How to Run
 ✅ 1. Install Dependencies
 git clone https://github.com/IamSadik/Counterfeit_Detection_Model.git
@@ -103,7 +103,7 @@ python src/train.py
 
 📊 3. Evaluate the Model
 python src/evaluate.py
-
+```
 
 
 🔍 Features
