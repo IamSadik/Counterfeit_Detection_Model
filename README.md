@@ -10,19 +10,28 @@ capsule-counterfeit-detection/
 ├── datasets/
 │ └── capsule_counterfeit_dataset/
 │ ├── train/
+│ │ ├── images/
+│ │ └── labels/
 │ ├── valid/
-│ └── test/
-│ └── data.yaml
+│ │ ├── images/
+│ │ └── labels/
+│ ├── test/
+│ │ ├── images/
+│ │ └── labels/
+│ └── capsule_data.yaml
+│
 ├── models/
-│ └── verification_model # Trained YOLOv8 model 
-│ └── counterfeit_capsule_model # Trained YOLOv8 model 
+│ ├── verification_model/ # Siamese or triplet-based model (future)
+│ └── counterfeit_capsule_model/ # Trained YOLOv8 model weights
+│
 ├── src/
-│ ├── train.py # Training script
-│ ├── train_verification.py # Training script
-│ ├── evaluate.py # Evaluation script
-│ ├── evaluate_verification.py # Evaluation script
-│ └── preprocess.py # Preprocessing utility
-│ └── preprocess_verification.py # Preprocessing utility
+│ ├── train.py # YOLOv8 training script
+│ ├── train_verification.py # Triplet/Siamese model training (future)
+│ ├── evaluate.py # YOLOv8 evaluation script
+│ ├── evaluate_verification.py # Verification model evaluation (future)
+│ ├── preprocess.py # Image/data prep for YOLO
+│ └── preprocess_verification.py # Image/data prep for verification model
+│
 ├── requirements.txt
 ├── README.md
 └── .gitignore
