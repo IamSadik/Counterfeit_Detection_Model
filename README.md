@@ -93,26 +93,26 @@ roboflow:
 
 ```
 🚀 How to Run
-
+```
 ©️ 0. Clone Project
 ```
 git clone https://github.com/IamSadik/Counterfeit_Detection_Model.git
-```
 
+```
 ✅ 1. Install Dependencies
 ```
 pip install -r requirements.txt
-```
 
+```
 ⚙️ 2. Train the Model
 ```
 python src/train.py
-```
 
+```
 📊 3. Evaluate the Model
 ```
 python src/evaluate.py
-```
+
 ```
 
 ```
