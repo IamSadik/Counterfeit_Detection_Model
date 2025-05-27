@@ -18,7 +18,7 @@ capsule-counterfeit-detection/
 │ ├── test/
 │ │ ├── images/
 │ │ └── labels/
-│ └── capsule_data.yaml
+│ └── data.yaml
 │
 ├── models/
 │ ├── verification_model/ # Siamese or triplet-based model (future)
