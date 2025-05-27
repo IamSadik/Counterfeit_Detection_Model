@@ -93,8 +93,7 @@ roboflow:
 
 
 🚀 How to Run
-```
-```
+
 ©️ 0. Clone Project
 ```
 git clone https://github.com/IamSadik/Counterfeit_Detection_Model.git
@@ -118,25 +117,27 @@ python src/evaluate.py
 
 
 🔍 Features
-Multi-class detection (8 capsule types)
+✅ Multi-Class Detection – Detects 8 distinct capsule classes (authentic + counterfeit across 4 brands)
 
-Lightweight and fast model (YOLOv8n or YOLOv8s)
+⚡ Lightweight Architecture – Powered by YOLOv8n/s for fast inference and low-latency use cases
 
-Optimized for real-time verification scenarios
+📦 Production-Ready – Trained on a clean, curated Roboflow dataset
 
-Trained on clean Roboflow-curated dataset
+🚀 Real-Time Capable – Optimized for live verification scenarios
 
-Ready-to-use for deployment or further fine-tuning
+🔁 Easily Extendable – Fine-tune or scale with minimal setup
 
 🛠️ Future Enhancements
- Incorporate triplet-loss based verification network
+🔁 Integrate Triplet-Loss Verification Models (e.g., Siamese Network) for one-shot/few-shot learning
 
- Add Grad-CAM or heatmaps for model explainability
+🧠 Add Grad-CAM / Heatmaps for model interpretability and capsule focus visualization
 
- Convert into a Flask/Streamlit web app for demo
+🌐 Deploy as a Flask/Streamlit Web App for interactive demos and real-world testing
 
- Expand dataset to cover more capsule brands
+📈 Expand the dataset to include more capsule brands and variations
 
 🤝 Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change or add.
+We welcome contributions!
+If you're planning major changes, please open an issue first to discuss the scope and approach.
+Pull requests for improvements, bug fixes, or new features are always appreciated!
 
