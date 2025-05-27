@@ -91,8 +91,9 @@ roboflow:
   url: https://universe.roboflow.com/medetect/medetect-9kphx/dataset/11
 ```
 
-```
+
 🚀 How to Run
+```
 ```
 ©️ 0. Clone Project
 ```
@@ -115,7 +116,7 @@ python src/evaluate.py
 
 ```
 
-```
+
 🔍 Features
 Multi-class detection (8 capsule types)
 
@@ -138,4 +139,4 @@ Ready-to-use for deployment or further fine-tuning
 
 🤝 Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change or add.
-```
+
