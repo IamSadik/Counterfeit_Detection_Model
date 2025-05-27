@@ -5,7 +5,7 @@ This project aims to detect and verify counterfeit medicinal capsules using a de
 ---
 
 ## 📁 Project Structure
-
+**```**
 capsule-counterfeit-detection/
 ├── datasets/
 │ └── capsule_counterfeit_dataset/
@@ -35,7 +35,7 @@ capsule-counterfeit-detection/
 ├── requirements.txt
 ├── README.md
 └── .gitignore
-
+**```**
 
 ---
 
@@ -89,7 +89,7 @@ roboflow:
   version: 11
   license: CC BY 4.0
   url: https://universe.roboflow.com/medetect/medetect-9kphx/dataset/11
-
+```
 
 
 🚀 How to Run
