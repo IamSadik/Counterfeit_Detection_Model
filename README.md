@@ -115,8 +115,8 @@ python src/evaluate.py
 
 ```
 
-
-##🔍 Features##
+---
+🔍 Features
 
 ✅ Multi-Class Detection – Detects 8 distinct capsule classes (authentic + counterfeit across 4 brands)
 
@@ -128,8 +128,8 @@ python src/evaluate.py
 
 🔁 Easily Extendable – Fine-tune or scale with minimal setup
 
-
-##🛠️ Future Enhancements##
+---
+🛠️ Future Enhancements
 
 🔁 Integrate Triplet-Loss Verification Models (e.g., Siamese Network) for one-shot/few-shot learning
 
@@ -139,8 +139,8 @@ python src/evaluate.py
 
 📈 Expand the dataset to include more capsule brands and variations
 
-
-##🤝 Contributing##
+---
+🤝 Contributing
 
 We welcome contributions!
 If you're planning major changes, please open an issue first to discuss the scope and approach.
