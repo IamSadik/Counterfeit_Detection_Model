@@ -9,16 +9,16 @@ This project aims to detect and verify counterfeit medicinal capsules using a de
 capsule-counterfeit-detection/
 ├── datasets/
 │ └── capsule_counterfeit_dataset/
-│ ├── train/
-│ │ ├── images/
-│ │ └── labels/
-│ ├── valid/
-│ │ ├── images/
-│ │ └── labels/
-│ ├── test/
-│ │ ├── images/
-│ │ └── labels/
-│ └── data.yaml
+│   ├── train/
+│   │ ├── images/
+│   │ └── labels/
+│   ├── valid/
+│   │ ├── images/
+│   │ └── labels/
+│   ├── test/
+│   │ ├── images/
+│   │ └── labels/
+│   └── data.yaml
 │
 ├── models/
 │ ├── verification_model/ # Siamese or triplet-based model (future)
