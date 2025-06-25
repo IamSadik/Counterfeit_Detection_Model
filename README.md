@@ -8,45 +8,47 @@ This project aims to detect and verify counterfeit medicinal capsules using a de
 ```
 capsule-counterfeit-detection/
 ├── datasets/
-│ └── counterfeit_med_detection/
-│   ├── train/
-│   │ ├── images/
-│   │ └── labels/
-│   ├── valid/
-│   │ ├── images/
-│   │ └── labels/
-│   ├── test/
-│   │ ├── images/
-│   │ └── labels/
-│   └── data.yaml
+│   └── counterfeit_med_detection/
+│       ├── train/
+│       │   ├── images/
+│       │   └── labels/
+│       ├── valid/
+│       │   ├── images/
+│       │   └── labels/
+│       ├── test/
+│       │   ├── images/
+│       │   └── labels/
+│       └── data.yaml
+│
 ├── verification_dataset/
-| ├── authentic_BrandW/
-| │   ├── a1.jpg
-| │   ├── a2.jpg
-| │   ...
-| ├── authentic_BrandX/
-| ├── authentic_BrandY/
-| ├── authentic_BrandZ/ 
-| ├── authentic_BrandW/
-| ├── counterfeit_BrandW/
-│ ├── counterfeit_BrandX/
-| ├── counterfeit_BrandY/
-| └── counterfeit_BrandZ/
+│   ├── authentic_BrandW/
+│   │   ├── a1.jpg
+│   │   ├── a2.jpg
+│   │   └── ...
+│   ├── authentic_BrandX/
+│   ├── authentic_BrandY/
+│   ├── authentic_BrandZ/
+│   ├── counterfeit_BrandW/
+│   ├── counterfeit_BrandX/
+│   ├── counterfeit_BrandY/
+│   └── counterfeit_BrandZ/
+│
 ├── models/
-│ ├── verification_model/ # Siamese or triplet-based model (future)
-│ └── counterfeit_capsule_model/ # Trained YOLOv8 model weights
+│   ├── verification_model/           # Siamese or triplet-based model (future)
+│   └── counterfeit_capsule_model/   # Trained YOLOv8 model weights
 │
 ├── src/
-│ ├── train.py # YOLOv8 training script
-│ ├── train_verification.py # Triplet/Siamese model training (future)
-│ ├── evaluate.py # YOLOv8 evaluation script
-│ ├── evaluate_verification.py # Verification model evaluation (future)
-│ ├── preprocess.py # Image/data prep for YOLO
-│ └── preprocess_verification.py # Image/data prep for verification model
+│   ├── train.py                     # YOLOv8 training script
+│   ├── train_verification.py       # Triplet/Siamese model training (future)
+│   ├── evaluate.py                 # YOLOv8 evaluation script
+│   ├── evaluate_verification.py    # Verification model evaluation (future)
+│   ├── preprocess.py               # Image/data prep for YOLO
+│   └── preprocess_verification.py  # Image/data prep for verification model
 │
 ├── requirements.txt
 ├── README.md
 └── .gitignore
+
 ```
 
 ---
