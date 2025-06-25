@@ -32,6 +32,7 @@ capsule-counterfeit-detection/
 │   ├── counterfeit_BrandX/
 │   ├── counterfeit_BrandY/
 │   └── counterfeit_BrandZ/
+│   └── verification_pairs.csv
 │
 ├── models/
 │   ├── verification_model/           # Siamese or triplet-based model (future)
