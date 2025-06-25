@@ -1,65 +1,68 @@
 import os
-import random
-from glob import glob
-from PIL import Image
-from tqdm import tqdm
+import cv2
+from pathlib import Path
 
-# === CONFIG ===
-SOURCE_DIR = "datasets/counterfeit_med_detection/train/images"
-TARGET_DIR = "datasets/capsule_verification_dataset_triplet"
-SPLITS = ["train", "valid", "test"]
-TRIPLETS_PER_SPLIT = {"train": 3000, "valid": 800, "test": 800}
+# Paths
+images_path = Path("datasets/counterfeit_med_detection/train/images")
+labels_path = Path("datasets/counterfeit_med_detection/train/labels")
+output_path = Path("verification_dataset")
 
-def create_dir(path):
-    os.makedirs(path, exist_ok=True)
+# Class folders
+class_names = ['authentic_BrandW', 'authentic_BrandX', 'authentic_BrandY', 'authentic_BrandZ',
+               'counterfeit_BrandW', 'counterfeit_BrandX', 'counterfeit_BrandY', 'counterfeit_BrandZ']
 
-def get_class_images(source_dir):
-    class_map = {}
-    for img_path in glob(os.path.join(source_dir, "*.jpg")):
-        filename = os.path.basename(img_path)
-        cls = "_".join(filename.split("_")[:2])  # e.g., authentic_BrandX
-        class_map.setdefault(cls, []).append(img_path)
-    return class_map
+for class_name in class_names:
+    os.makedirs(output_path / class_name, exist_ok=True)
 
-def create_triplets(class_map, split, n_triplets):
-    split_dir = os.path.join(TARGET_DIR, split)
-    anchor_dir = os.path.join(split_dir, "anchor")
-    positive_dir = os.path.join(split_dir, "positive")
-    negative_dir = os.path.join(split_dir, "negative")
-    label_file = os.path.join(split_dir, "triplets.txt")
+# Class mapping
+class_map = {i: name for i, name in enumerate(class_names)}
 
-    create_dir(anchor_dir)
-    create_dir(positive_dir)
-    create_dir(negative_dir)
+# Process labels
+for label_file in labels_path.glob("*.txt"):
+    img_file_jpg = images_path / f"{label_file.stem}.jpg"
+    img_file_png = images_path / f"{label_file.stem}.png"
+    img_file = img_file_jpg if img_file_jpg.exists() else img_file_png
+    if not img_file.exists():
+        print(f"❌ Image not found for: {label_file.stem}")
+        continue
 
-    valid_classes = [cls for cls in class_map if len(class_map[cls]) >= 2]
+    image = cv2.imread(str(img_file))
+    if image is None:
+        print(f"❌ Failed to load image: {img_file}")
+        continue
 
-    with open(label_file, "w") as f:
-        for i in tqdm(range(n_triplets), desc=f"Generating {split} triplets"):
-            pos_class = random.choice(valid_classes)
-            anchor_img, positive_img = random.sample(class_map[pos_class], 2)
+    h, w = image.shape[:2]
 
-            neg_class = random.choice([cls for cls in class_map if cls != pos_class])
-            negative_img = random.choice(class_map[neg_class])
-
-            try:
-                Image.open(anchor_img).save(os.path.join(anchor_dir, f"triplet_{i}.jpg"))
-                Image.open(positive_img).save(os.path.join(positive_dir, f"triplet_{i}.jpg"))
-                Image.open(negative_img).save(os.path.join(negative_dir, f"triplet_{i}.jpg"))
-                f.write(f"triplet_{i}.jpg\n")
-            except Exception as e:
-                print(f"❌ Failed triplet {i}: {e}")
+    with open(label_file, "r") as f:
+        lines = f.readlines()
+        for i, line in enumerate(lines):
+            parts = list(map(float, line.strip().split()))
+            if len(parts) < 6:
+                print(f"⚠️ Skipping line with too few points: {line}")
                 continue
 
-def preprocess_triplet_verification_dataset():
-    print("🔍 Preparing triplet verification dataset...")
-    class_map = get_class_images(SOURCE_DIR)
-    print(f"✅ Found {len(class_map)} distinct classes.")
+            class_id = int(parts[0])
+            coords = parts[1:]
+            xs = coords[::2]
+            ys = coords[1::2]
 
-    for split in SPLITS:
-        create_triplets(class_map, split, TRIPLETS_PER_SPLIT[split])
+            x_min = int(min(xs) * w)
+            x_max = int(max(xs) * w)
+            y_min = int(min(ys) * h)
+            y_max = int(max(ys) * h)
 
-    print("✅ Triplet preprocessing complete at:", TARGET_DIR)
+            # Safe boundary clipping
+            x_min = max(0, x_min)
+            y_min = max(0, y_min)
+            x_max = min(w, x_max)
+            y_max = min(h, y_max)
 
-if __name__ == "__main__":
-    preprocess_triplet_verification_dataset()
+            # Skip if bbox too small or invalid
+            if x_max - x_min < 5 or y_max - y_min < 5:
+                print(f"⚠️ Skipping tiny or invalid crop for {img_file.name} index {i}")
+                continue
+
+            cropped = image[y_min:y_max, x_min:x_max]
+            save_path = output_path / class_map[class_id] / f"{label_file.stem}_{i}.jpg"
+            cv2.imwrite(str(save_path), cropped)
+            print(f"✅ Saved: {save_path}")

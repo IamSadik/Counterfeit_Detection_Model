@@ -1,114 +1,143 @@
+import torch
+import torch.nn as nn
+from torchvision import transforms, models
+from torch.utils.data import Dataset, DataLoader
+from PIL import Image
+import pandas as pd
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from tqdm import tqdm
 import os
-import tensorflow as tf
-import numpy as np
-from tensorflow.keras import layers, models, losses
-from tensorflow.keras.applications import EfficientNetB3
+from pathlib import Path
 
-# === CONFIG ===
-TEST_DATASET_DIR = "datasets/capsule_verification_dataset_triplet/test"
-MODEL_PATH = "models/verification_model/model_triplet.h5"
-TARGET_SIZE = (2048, 2048)  # Width x Height
-EMBEDDING_DIM = 512
-MARGIN = 1.0
+# -------------------------------
+# Dataset
+# -------------------------------
+class VerificationDataset(Dataset):
+    def __init__(self, csv_path, transform=None):
+        self.df = pd.read_csv(csv_path)
+        self.transform = transform
 
-# === Triplet Loss (for inference only, not used in accuracy)
-class TripletLoss(losses.Loss):
-    def __init__(self, margin=MARGIN):
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+        img1 = Image.open(row["image1"]).convert("RGB")
+        img2 = Image.open(row["image2"]).convert("RGB")
+        label = float(row["label"])
+
+        if self.transform:
+            img1 = self.transform(img1)
+            img2 = self.transform(img2)
+
+        return img1, img2, label
+
+    def __len__(self):
+        return len(self.df)
+
+# -------------------------------
+# Siamese Model
+# -------------------------------
+class SiameseNetwork(nn.Module):
+    def __init__(self):
         super().__init__()
-        self.margin = margin
+        base = models.resnet18(pretrained=False)
+        base.fc = nn.Linear(base.fc.in_features, 256)
+        self.feature_extractor = base
+        self.head = nn.Sequential(
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 1),
+            nn.Sigmoid()
+        )
 
-    def call(self, y_true, y_pred):
-        anchor, positive, negative = tf.unstack(tf.reshape(y_pred, (-1, 3, EMBEDDING_DIM)), 3, 1)
-        d_ap = tf.reduce_sum(tf.square(anchor - positive), axis=1)
-        d_an = tf.reduce_sum(tf.square(anchor - negative), axis=1)
-        loss = tf.maximum(d_ap - d_an + self.margin, 0.0)
-        return tf.reduce_mean(loss)
+    def forward_once(self, x):
+        return self.feature_extractor(x)
 
-# === Embedding model (EfficientNetB3 -> Dense(512))
-def create_embedding_model():
-    base_model = EfficientNetB3(include_top=False, input_shape=(TARGET_SIZE[1], TARGET_SIZE[0], 3), pooling='avg')
-    base_model.trainable = False
-    inputs = layers.Input(shape=(TARGET_SIZE[1], TARGET_SIZE[0], 3))
-    x = base_model(inputs)
-    x = layers.Dense(EMBEDDING_DIM)(x)
-    x = layers.Lambda(lambda t: tf.math.l2_normalize(t, axis=1))(x)
-    return models.Model(inputs, x, name="embedding_model")
+    def forward(self, x1, x2):
+        f1 = self.forward_once(x1)
+        f2 = self.forward_once(x2)
+        distance = torch.abs(f1 - f2)
+        return self.head(distance)
 
-# === Full triplet model wrapper
-def build_triplet_model():
-    embedding_model = create_embedding_model()
+# -------------------------------
+# Evaluate on Dataset
+# -------------------------------
+def evaluate_from_dataset(model, device, transform):
+    csv_path = "verification_dataset/verification_pairs.csv"
+    dataset = VerificationDataset(csv_path, transform=transform)
+    dataloader = DataLoader(dataset, batch_size=64, shuffle=False)
 
-    input_anchor = layers.Input(shape=(TARGET_SIZE[1], TARGET_SIZE[0], 3), name="anchor_input")
-    input_positive = layers.Input(shape=(TARGET_SIZE[1], TARGET_SIZE[0], 3), name="positive_input")
-    input_negative = layers.Input(shape=(TARGET_SIZE[1], TARGET_SIZE[0], 3), name="negative_input")
+    all_preds, all_labels = [], []
 
-    emb_anchor = embedding_model(input_anchor)
-    emb_positive = embedding_model(input_positive)
-    emb_negative = embedding_model(input_negative)
+    with torch.no_grad():
+        for img1, img2, labels in tqdm(dataloader, desc="🔎 Evaluating", unit="batch"):
+            img1, img2 = img1.to(device), img2.to(device)
+            outputs = model(img1, img2).squeeze().cpu().numpy()
+            preds = (outputs > 0.5).astype(int)
+            all_preds.extend(preds)
+            all_labels.extend(labels.numpy())
 
-    merged_output = layers.Concatenate(axis=1)([emb_anchor, emb_positive, emb_negative])
-    model = models.Model(inputs=[input_anchor, input_positive, input_negative], outputs=merged_output)
-    return model
+    acc = accuracy_score(all_labels, all_preds)
+    precision = precision_score(all_labels, all_preds)
+    recall = recall_score(all_labels, all_preds)
+    f1 = f1_score(all_labels, all_preds)
 
-# === Load test triplets
-def load_triplet_data(dataset_path):
-    anchor_dir = os.path.join(dataset_path, "anchor")
-    positive_dir = os.path.join(dataset_path, "positive")
-    negative_dir = os.path.join(dataset_path, "negative")
+    print(f"\n📊 Evaluation Results:")
+    print(f"Accuracy  : {acc:.4f}")
+    print(f"Precision : {precision:.4f}")
+    print(f"Recall    : {recall:.4f}")
+    print(f"F1 Score  : {f1:.4f}")
 
-    files = sorted(os.listdir(anchor_dir))
-    anchor_paths = [os.path.join(anchor_dir, f) for f in files]
-    positive_paths = [os.path.join(positive_dir, f) for f in files]
-    negative_paths = [os.path.join(negative_dir, f) for f in files]
+# -------------------------------
+# Custom Pair Evaluation
+# -------------------------------
+def evaluate_custom_pair(model, device, transform):
+    print("\n📷 Enter two image paths to compare:")
+    image1_path = input("Path to Image 1: ").strip()
+    image2_path = input("Path to Image 2: ").strip()
 
-    dataset = tf.data.Dataset.from_tensor_slices((anchor_paths, positive_paths, negative_paths))
+    if not Path(image1_path).exists() or not Path(image2_path).exists():
+        print("❌ One or both image paths are invalid.")
+        return
 
-    def process_triplet(anchor_path, pos_path, neg_path):
-        def load_and_preprocess(path):
-            img = tf.io.read_file(path)
-            img = tf.image.decode_jpeg(img, channels=3)
-            img = tf.image.resize_with_pad(img, TARGET_SIZE[1], TARGET_SIZE[0])
-            img = tf.cast(img, tf.float32) / 255.0
-            return img
+    img1 = transform(Image.open(image1_path).convert("RGB")).unsqueeze(0).to(device)
+    img2 = transform(Image.open(image2_path).convert("RGB")).unsqueeze(0).to(device)
 
-        anchor = load_and_preprocess(anchor_path)
-        positive = load_and_preprocess(pos_path)
-        negative = load_and_preprocess(neg_path)
-        return (anchor, positive, negative)
+    with torch.no_grad():
+        output = model(img1, img2).item()
 
-    return dataset.map(process_triplet, num_parallel_calls=tf.data.AUTOTUNE)
+    print(f"\n🔍 Similarity Score (0 = different, 1 = same): {output:.4f}")
+    if output > 0.5:
+        print("✅ Prediction: SAME capsule (likely authentic)")
+    else:
+        print("❌ Prediction: DIFFERENT capsules (possibly counterfeit)")
 
-# === Compute accuracy
-def compute_accuracy(model, dataset):
-    correct = 0
-    total = 0
+# -------------------------------
+# Runner
+# -------------------------------
+def evaluate_model():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("🖥️ Using device:", device)
 
-    for anchor, positive, negative in dataset:
-        embeddings = model.predict([tf.expand_dims(anchor, 0),
-                                    tf.expand_dims(positive, 0),
-                                    tf.expand_dims(negative, 0)], verbose=0)
+    model_path = "models/verification_model/siamese.pth"
+    model = SiameseNetwork().to(device)
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    model.eval()
 
-        emb_anchor, emb_positive, emb_negative = np.split(embeddings[0], 3)
+    transform = transforms.Compose([
+        transforms.Resize((320, 320)),
+        transforms.ToTensor()
+    ])
 
-        d_ap = np.sum(np.square(emb_anchor - emb_positive))
-        d_an = np.sum(np.square(emb_anchor - emb_negative))
+    print("\nChoose Evaluation Mode:")
+    print("1️⃣  Custom Test (Input two image paths)")
+    print("2️⃣  Evaluate full dataset from CSV")
+    choice = input("Enter 1 or 2: ").strip()
 
-        if d_ap < d_an:
-            correct += 1
-        total += 1
+    if choice == "1":
+        evaluate_custom_pair(model, device, transform)
+    elif choice == "2":
+        evaluate_from_dataset(model, device, transform)
+    else:
+        print("❌ Invalid option selected.")
 
-    accuracy = correct / total if total > 0 else 0
-    return accuracy
-
-# === Run evaluation
-print("📦 Rebuilding model and loading weights...")
-model = build_triplet_model()
-model.load_weights(MODEL_PATH)
-
-print("📂 Loading test dataset...")
-test_dataset = load_triplet_data(TEST_DATASET_DIR)
-
-print("✅ Evaluating...")
-accuracy = compute_accuracy(model, test_dataset)
-
-print(f"🎯 Verification Accuracy: {accuracy * 100:.2f}%")
+if __name__ == "__main__":
+    evaluate_model()

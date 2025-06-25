@@ -7,6 +7,4 @@ opencv-python==4.6.0.66
 matplotlib==3.7.0
 torch==2.0.0
 efficientnet-pytorch==0.7.1
-Pillow==8.0.0
-pip uninstall torch
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
