@@ -19,7 +19,19 @@ capsule-counterfeit-detection/
 │   │ ├── images/
 │   │ └── labels/
 │   └── data.yaml
-│
+├── verification_dataset/
+|    ├── authentic_BrandW/
+|    │   ├── a1.jpg
+|    │   ├── a2.jpg
+|    │   ...
+|    ├── authentic_BrandX/
+|    ├── authentic_BrandY/
+|    ├── authentic_BrandZ/ 
+|    ├── authentic_BrandW/
+|    ├── counterfeit_BrandW/
+│    ├── counterfeit_BrandX/
+|    ├── counterfeit_BrandY/
+|    ├── counterfeit_BrandZ/
 ├── models/
 │ ├── verification_model/ # Siamese or triplet-based model (future)
 │ └── counterfeit_capsule_model/ # Trained YOLOv8 model weights
