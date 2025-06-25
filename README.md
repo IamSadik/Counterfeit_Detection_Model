@@ -31,7 +31,7 @@ capsule-counterfeit-detection/
 │   ├── counterfeit_BrandW/
 │   ├── counterfeit_BrandX/
 │   ├── counterfeit_BrandY/
-│   └── counterfeit_BrandZ/
+│   ├── counterfeit_BrandZ/
 │   └── verification_pairs.csv
 │
 ├── models/
