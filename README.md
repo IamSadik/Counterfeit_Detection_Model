@@ -8,7 +8,7 @@ This project aims to detect and verify counterfeit medicinal capsules using a de
 ```
 capsule-counterfeit-detection/
 ├── datasets/
-│ └── capsule_counterfeit_dataset/
+│ └── counterfeit_med_detection/
 │   ├── train/
 │   │ ├── images/
 │   │ └── labels/
