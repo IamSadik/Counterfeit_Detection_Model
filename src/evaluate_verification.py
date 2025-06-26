@@ -8,6 +8,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from tqdm import tqdm
 import os
 from pathlib import Path
+import numpy as np
+
 
 # -------------------------------
 # Dataset
@@ -66,15 +68,28 @@ def evaluate_from_dataset(model, device, transform):
     dataloader = DataLoader(dataset, batch_size=64, shuffle=False)
 
     all_preds, all_labels = [], []
+    results = []
 
     with torch.no_grad():
-        for img1, img2, labels in tqdm(dataloader, desc="🔎 Evaluating", unit="batch"):
+        for i, (img1, img2, labels) in enumerate(tqdm(dataloader, desc="🔎 Evaluating", unit="batch")):
             img1, img2 = img1.to(device), img2.to(device)
             outputs = model(img1, img2).squeeze().cpu().numpy()
             preds = (outputs > 0.5).astype(int)
+
             all_preds.extend(preds)
             all_labels.extend(labels.numpy())
 
+            # Save per-pair results
+            for j in range(len(preds)):
+                row_idx = i * dataloader.batch_size + j
+                img1_path = dataset.df.iloc[row_idx]["image1"]
+                img2_path = dataset.df.iloc[row_idx]["image2"]
+                true_label = int(labels[j].item())
+                pred_label = int(preds[j])
+                score = float(outputs[j]) if isinstance(outputs, (list, np.ndarray)) else float(outputs)
+                results.append([img1_path, img2_path, true_label, pred_label, score])
+
+    # Metrics
     acc = accuracy_score(all_labels, all_preds)
     precision = precision_score(all_labels, all_preds)
     recall = recall_score(all_labels, all_preds)
@@ -85,6 +100,26 @@ def evaluate_from_dataset(model, device, transform):
     print(f"Precision : {precision:.4f}")
     print(f"Recall    : {recall:.4f}")
     print(f"F1 Score  : {f1:.4f}")
+
+    # -------------------------------
+    # Save Results
+    # -------------------------------
+    os.makedirs("results/verification_eval", exist_ok=True)
+
+    # Save metrics
+    with open("results/verification_eval/metrics.txt", "w") as f:
+        f.write("Verification Evaluation Results\n")
+        f.write("===============================\n")
+        f.write(f"Accuracy  : {acc:.4f}\n")
+        f.write(f"Precision : {precision:.4f}\n")
+        f.write(f"Recall    : {recall:.4f}\n")
+        f.write(f"F1 Score  : {f1:.4f}\n")
+
+    # Save prediction per pair
+    result_df = pd.DataFrame(results, columns=["Image1", "Image2", "TrueLabel", "PredictedLabel", "SimilarityScore"])
+    result_df.to_csv("results/verification_eval/predictions.csv", index=False)
+
+    print("📁 Results saved to: results/verification_eval/")
 
 # -------------------------------
 # Custom Pair Evaluation
