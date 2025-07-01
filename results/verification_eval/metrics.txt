@@ -1,6 +1,6 @@
 Verification Evaluation Results
 ===============================
-Accuracy  : 0.9965
-Precision : 0.9962
-Recall    : 0.9968
-F1 Score  : 0.9965
+Accuracy  : 0.9418
+Precision : 0.9244
+Recall    : 0.9617
+F1 Score  : 0.9427

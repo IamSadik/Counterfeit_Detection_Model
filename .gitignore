@@ -1,6 +1,7 @@
 # Datasets
 verification_dataset/
 /datasets
+verification_dataset_test/
 
 #Papers
 *.docx

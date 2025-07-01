@@ -63,7 +63,7 @@ class SiameseNetwork(nn.Module):
 # Evaluate on Dataset
 # -------------------------------
 def evaluate_from_dataset(model, device, transform):
-    csv_path = "verification_dataset/verification_pairs.csv"
+    csv_path = "verification_dataset_test/verification_pairs_test.csv"
     dataset = VerificationDataset(csv_path, transform=transform)
     dataloader = DataLoader(dataset, batch_size=64, shuffle=False)
 
