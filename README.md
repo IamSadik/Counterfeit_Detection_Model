@@ -7,24 +7,24 @@ This project aims to detect and verify counterfeit medicinal capsules using a de
 ## 📁 Project Structure
 ```
 capsule-counterfeit-detection/
+├── .git/
 ├── datasets/
-│   └── counterfeit_med_detection/
-│       ├── train/
-│       │   ├── images/
-│       │   └── labels/
-│       ├── valid/
-│       │   ├── images/
-│       │   └── labels/
-│       ├── test/
-│       │   ├── images/
-│       │   └── labels/
-│       └── data.yaml
-│
+├── models/
+│   ├── counterfeit_capsule_model/
+│   └── verification_model/
+├── results/
+├── runs/
+├── src/
+│   ├── train.py
+│   ├── train_verification.py
+│   ├── evaluate.py
+│   ├── evaluate_verification.py
+│   ├── preprocess.py
+│   └── preprocess_verification.py
+├── test/
+├── utils/
 ├── verification_dataset/
 │   ├── authentic_BrandW/
-│   │   ├── a1.jpg
-│   │   ├── a2.jpg
-│   │   └── ...
 │   ├── authentic_BrandX/
 │   ├── authentic_BrandY/
 │   ├── authentic_BrandZ/
@@ -34,21 +34,24 @@ capsule-counterfeit-detection/
 │   ├── counterfeit_BrandZ/
 │   └── verification_pairs.csv
 │
-├── models/
-│   ├── verification_model/           # Siamese or triplet-based model (future)
-│   └── counterfeit_capsule_model/   # Trained YOLOv8 model weights
+├── verification_dataset_test/
+│   ├── authentic_BrandW/
+│   ├── authentic_BrandX/
+│   ├── authentic_BrandY/
+│   ├── authentic_BrandZ/
+│   ├── counterfeit_BrandW/
+│   ├── counterfeit_BrandX/
+│   ├── counterfeit_BrandY/
+│   ├── counterfeit_BrandZ/
+│   └── verification_pairs.csv
 │
-├── src/
-│   ├── train.py                     # YOLOv8 training script
-│   ├── train_verification.py       # Triplet/Siamese model training (future)
-│   ├── evaluate.py                 # YOLOv8 evaluation script
-│   ├── evaluate_verification.py    # Verification model evaluation (future)
-│   ├── preprocess.py               # Image/data prep for YOLO
-│   └── preprocess_verification.py  # Image/data prep for verification model
-│
-├── requirements.txt
+├── .gitignore
+├── main.py
 ├── README.md
-└── .gitignore
+├── requirements.txt
+├── yolov8m.pt
+└── yolov10n.pt
+
 
 ```
 
